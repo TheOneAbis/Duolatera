@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class VR_coop_Testing1 : ModuleRules
+public class Duolatera : ModuleRules
 {
-	public VR_coop_Testing1(ReadOnlyTargetRules Target) : base(Target)
+	public Duolatera(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
