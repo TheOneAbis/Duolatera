@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class VR_coop_Testing1EditorTarget : TargetRules
+public class DuolateraEditorTarget : TargetRules
 {
-	public VR_coop_Testing1EditorTarget(TargetInfo Target) : base(Target)
+	public DuolateraEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 
-		ExtraModuleNames.AddRange( new string[] { "VR_coop_Testing1" } );
+		ExtraModuleNames.AddRange( new string[] { "Duolatera" } );
 	}
 }

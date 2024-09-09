@@ -7,7 +7,7 @@
 /**
  * 
  */
-class VR_COOP_TESTING1_API Steam_Online_Service
+class DUOLATERA_API Steam_Online_Service
 {
 public:
 	Steam_Online_Service();

@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "VR_coop_Testing1",
+			"Name": "Duolatera",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
