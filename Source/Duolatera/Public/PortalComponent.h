@@ -28,4 +28,12 @@ public:
 	// Override OnTagged from Taggable interface
 	// This should be called every time a player fires a laser tool at an actor with this component
 	void OnTagged_Implementation(FHitResult tagHit) override;
+
+	UFUNCTION(BlueprintCallable, Category=PortalFunctions)
+	void ResetCanvas();
+
+private:
+
+	TArray<FVector> drawnVerts;
+
 };
