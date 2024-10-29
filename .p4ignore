@@ -1,0 +1,106 @@
+# Custom .p4ignore for Unreal Engine Projects
+# --------------------------------------------------
+
+# Unreal Engine specific directories
+# ----------------------------------
+Saved/
+Intermediate/
+LocalBuilds/
+*/Intermediate/*
+*/Saved/*
+Engine/Intermediate/*
+Engine/DerivedDataCache/*
+Engine/Programs/UnrealBuildTool/*
+Engine/Programs/*\Intermediate\*
+Engine/Programs/*\Saved\*
+Engine/Documentation/*
+
+# Build outputs and intermediates
+# -------------------------------
+Binaries/
+Engine/Binaries/*
+*/obj/*
+/Binaries/*
+/Intermediate/*
+/Build/Receipts/*
+/DerivedDataCache/*
+
+# Visual Studio specific files
+# ----------------------------
+/*.sln  # Only root .sln files
+*.suo
+*.user
+*.csproj.*
+*.csprojAssemblyReference.cache
+.vs/*
+/Engine/Programs/UnrealBuildTool/*.txt
+/Engine/Programs/UnrealBuildTool/*.xml
+
+# Xcode specific files
+# --------------------
+*.xcworkspace
+*.xcodeproj
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Linux and Mac specific files
+# ----------------------------
+*.sym
+*.debug
+*.user
+*.pro
+*.pri
+*.kdev4
+.DS_Store
+
+# Temporary and backup files
+# --------------------------
+*.opensdf
+*.sdf
+*.tmp
+*.mdb
+*-Debug.*
+/FileOpenOrder/
+*~
+crashinfo--*
+
+# Python cached files
+# -------------------
+*.pyc
+
+# Source control and configuration
+# --------------------------------
+.git/*
+.p4sync.txt
+p4config.txt
+
+# Other build and temporary files
+# -------------------------------
+*.vcxproj
+*.exe.config
+*.exe.manifest
+.ue4dependencies
+Samples/*
+FeaturePacks/*
+*.target.xml
+
+# Unreal Engine Derived Data Cache (Various formats)
+**/DerivedDataCache/Boot.ddc
+**/DerivedDataCache/**/*.udd
+Engine/DerivedDataCache/*
+
+# Unreal Engine Build Receipts
+Engine/Build/Receipts/*
+
+# Ignore documentation generated for C# tools
+Engine/Binaries/DotNET/AutomationScripts/BuildGraph.Automation.xml
+
+# Ignore version and exp files in the Engine/Binaries directory
+/Engine/Binaries/**/*.version
+/Engine/Binaries/**/*.exp
+
+# Ignore Swarm local save files
+Engine/Binaries/DotNET/SwarmAgent.DeveloperOptions.xml
+Engine/Binaries/DotNET/SwarmAgent.Options.xml
