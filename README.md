@@ -11,9 +11,9 @@ This also serves as a place to store assets publicly for non-collaborators to ex
 
 # Contributers and Roles:
 
+- Urvashi Dhingra: Producer, Gameplay Programmer
+- Annie Zhang: Game Designer, Level Designer, Narrative Designer
 - AJ Biswas: Graphics Programmer, Gameplay Systems Engineer, Music Composer, Sound Designer
 - Noya Cai: Graphics Programmer, Technical Artist, Gameplay Programmer
-- Urvashi Dhingra: Producer, Gameplay Programmer
 - Tsingtao Zhang: Networking Programmer, Gameplay Programmer
-- Annie Zhang: Game Designer, Level Designer, Narrative Designer
 - Xinjie Zhou - Concept Artist, Texture Artist
