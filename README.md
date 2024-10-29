@@ -16,3 +16,4 @@ This also serves as a place to store assets publicly for non-collaborators to ex
 - Urvashi Dhingra: Producer, Gameplay Programmer
 - Tsingtao Zhang: Networking Programmer, Gameplay Programmer
 - Annie Zhang: Game Designer, Level Designer, Narrative Designer
+- Xinjie Zhou - Concept Artist, Texture Artist
