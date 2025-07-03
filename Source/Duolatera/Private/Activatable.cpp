@@ -27,11 +27,7 @@ bool AActivatable::AddActivator(AActor* activator)
 	int prevCount = GetNumActivators();
 
 	bool exists = false;
-	if (deactivatorIds.Remove(activator->GetUniqueID()) == 0) // nothing to remove
-	{
-		exists = true;
-		activatorIds.Add(activator->GetUniqueID(), &exists);
-	}
+	activators.Add(activator, &exists);
 	
 	// new ID was added, so check if it's enough to activate
 	bool shouldActivate = !exists && prevCount == RequiredActivators - 1;
@@ -39,6 +35,12 @@ bool AActivatable::AddActivator(AActor* activator)
 	{
 		Activate();
 		OnPuzzleActivated.Broadcast();
+	}
+
+	if (!CanOverflow && !(RemainActive || exists) && prevCount == RequiredActivators)
+	{
+		Deactivate();
+		OnPuzzleDeactivated.Broadcast();
 	}
 
 	return shouldActivate;
@@ -49,20 +51,20 @@ bool AActivatable::RemoveActivator(AActor* activator)
 	if (!activator) return false;
 
 	int prevCount = GetNumActivators();
-
-	bool exists = false;
-	if (activatorIds.Remove(activator->GetUniqueID()) == 0) // nothing to remove
-	{
-		exists = true;
-		deactivatorIds.Add(activator->GetUniqueID(), &exists);
-	}
+	int removed = activators.Remove(activator);
 
 	// ID was removed, so check if it's no longer enough to stay active
-	bool shouldDeactivate = !RemainActive && !exists && prevCount == RequiredActivators;
+	bool shouldDeactivate = removed && !RemainActive && prevCount == RequiredActivators;
 	if (shouldDeactivate)
 	{
 		Deactivate();
 		OnPuzzleDeactivated.Broadcast();
+	}
+
+	if (!CanOverflow && removed && prevCount == RequiredActivators + 1)
+	{
+		Activate();
+		OnPuzzleActivated.Broadcast();
 	}
 
 	return shouldDeactivate;
@@ -70,6 +72,68 @@ bool AActivatable::RemoveActivator(AActor* activator)
 
 int AActivatable::GetNumActivators()
 {
-	return activatorIds.Num() - deactivatorIds.Num();
+	return activators.Num();
 }
 
+TArray<AActor*> AActivatable::GetActivatorList()
+{
+	return activators.Array();
+}
+
+void AActivatable::SetRequiredActivators(int newReqCount)
+{
+	if (RequiredActivators == newReqCount) return;
+
+	int prevReq = RequiredActivators;
+	RequiredActivators = FMath::Max(newReqCount, 0);
+	int currentCount = GetNumActivators();
+	
+	if (CanOverflow)
+	{
+		// deactivate if new requirement not equal to the count
+		if (!RemainActive && prevReq == currentCount && RequiredActivators != currentCount)
+		{
+			Deactivate();
+			OnPuzzleDeactivated.Broadcast();
+		}
+		// activate if new requirement is equal to the count
+		else if (RequiredActivators == currentCount)
+		{
+			Activate();
+			OnPuzzleActivated.Broadcast();
+		}
+	}
+	else
+	{
+		// deactivate if new requirement is greater than the count
+		if (!RemainActive && prevReq >= currentCount && RequiredActivators < currentCount)
+		{
+			Deactivate();
+			OnPuzzleDeactivated.Broadcast();
+		}
+		// activate if new requirement is less or equal to the count
+		else if (prevReq < currentCount && RequiredActivators >= currentCount)
+		{
+			Activate();
+			OnPuzzleActivated.Broadcast();
+		}
+	}
+}
+
+bool AActivatable::IsActivator(AActor* activator)
+{
+	return activators.Find(activator) != nullptr;
+}
+
+void AActivatable::SetRemainActive(bool remainActive)
+{
+	if (RemainActive == remainActive) return;
+
+	if (!remainActive && (activators.Num() < RequiredActivators || 
+		(!CanOverflow && activators.Num() > RequiredActivators)))
+	{
+		Deactivate();
+		OnPuzzleDeactivated.Broadcast();
+	}
+	RemainActive = remainActive;
+}

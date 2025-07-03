@@ -1,0 +1,25 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "VRCelShading",
+	"Description": "Cel-shading plugin for VR (Forward-shading pipeline)",
+	"Category": "Other",
+	"CreatedBy": "Noya Cai",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault" : false,
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "VRCelShading",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}

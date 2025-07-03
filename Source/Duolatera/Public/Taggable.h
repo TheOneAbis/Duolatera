@@ -23,6 +23,6 @@ class DUOLATERA_API ITaggable
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Taggables)
-	void OnTagged(FHitResult tagHit);
+	void OnTagged(FHitResult tagHit, AActor* tagSource);
 
 };

@@ -5,11 +5,14 @@
 #include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
 
+
+
 // Sets default values
 ADialogueManager::ADialogueManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 // Called when the game starts or when spawned
@@ -19,48 +22,68 @@ void ADialogueManager::BeginPlay()
 	
     PopulateDialogueQueue();
 
-    if (!DialogueQueue.IsEmpty())
+    if (!DialogueQ.IsEmpty())
     {
-        StartDialogueQueue();
+        CurrentEntryID = 0;
+        DuringDialogue();
+        NextEntry();
     }
 }
 
-void ADialogueManager::StartDialogueQueue()
-{
-    ShowNextDialogue();
-}
+void ADialogueManager::Tick(float DeltaTime) {
 
-void ADialogueManager::ShowNextDialogue()
-{
-    if (!DialogueQueue.IsEmpty())
+    Super::Tick(DeltaTime);
+
+    if (StartTiming) 
     {
-        if (DialogueQueue.Dequeue(CurrentDialogue))
+        timer += DeltaTime;
+        if (timer > CurrentEntry.Time) 
         {
-            DisplayDialogue(CurrentDialogue.Key);
+            StartTiming = false;
+            timer = 0;
+            HandlePlayerInput(TIME);
         }
     }
 }
 
-void ADialogueManager::HandlePlayerInput(const FString& PlayerInput)
+void ADialogueManager::ManageCurrentEntryID() 
 {
-    if (CurrentDialogue.Value == PlayerInput)
+    CurrentEntryID ++;
+    if (CurrentEntryID > DialogueArray.Num())
+        return;
+
+    DuringDialogue();
+}
+
+void ADialogueManager::NextEntry() 
+{
+    DialogueQ.Dequeue(CurrentEntry);
+    DisplayDialogue(CurrentEntry.Dialogue);
+    UpdateUIImage(CurrentEntry.UI_image);
+    if (CurrentEntry.Input == TIME)
+        StartTiming = true;
+}
+
+void ADialogueManager::Proceed()
+{
+    if (!DialogueQ.IsEmpty())
     {
-        if (!DialogueQueue.IsEmpty())
-        {
-            if (GEngine)
-            {
-                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("PlayerInput: %s"), *PlayerInput));
-            }
-            ShowNextDialogue();
-        }
+        ManageCurrentEntryID();
+
+        NextEntry();
+    }
+}
+
+void ADialogueManager::HandlePlayerInput(const RequiredInput PlayerInput)
+{
+    if (CurrentEntry.Input == PlayerInput)
+    {
+        ClearDialogueUI();
+
+        if (CurrentEntry.bCanContinue) 
+            Proceed();        
         else
-        {
-            if (GEngine)
-            {
-                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("PlayerInput: %s"), *PlayerInput));
-            }
-            ClearDialogueUI();
-        }
+            BetweenDialogue();
     }
 }
 
@@ -78,26 +101,14 @@ void ADialogueManager::UpdateWidget(const FString& Text)
 
 void ADialogueManager::PopulateDialogueQueue()
 {
-    TArray<FString> DialogueParts;
-    AllDialogues.ParseIntoArray(DialogueParts, TEXT("|"), true);
-
-    TArray<FString> ActionParts = {
-       TEXT("A/X_Button"),
-       TEXT("Teleport_BothButtons"),
-       TEXT("Grab_Button"),
-       TEXT("Trigger_Button")
-    };
-
-    int32 NumDialogues = FMath::Min(DialogueParts.Num(), ActionParts.Num());
-    if (NumDialogues == 0)
+    if (DialogueArray.Num() == 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("No dialogues parsed from AllDialogues. Please check the input."));
         return;
     }
-
-    for (int32 i = 0; i < NumDialogues; i++)
+    for (int32 i = 0; i < DialogueArray.Num(); i ++)
     {
-        DialogueQueue.Enqueue(TPair<FString, FString>(DialogueParts[i], ActionParts[i]));
+        DialogueQ.Enqueue(DialogueArray[i]);
     }
 }
 

@@ -19,8 +19,7 @@ public:
 
 private:
 
-	TSet<uint32> activatorIds;
-	TSet<uint32> deactivatorIds;
+	TSet<AActor*> activators;
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,6 +28,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Activatables", meta = (Description =
 		"Activation logic. Override this in a child Actor."))
 	void Activate();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Activatables", meta = (Description =
 		"Deactivation logic. Override this in a child Actor."))
 	void Deactivate();
@@ -38,16 +38,30 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Activatables", meta = (Description = 
-		"Adds an activator to the activator set. If the activator in question previously existed in this actor's deactivator list, it is removed instead. Returns true if this activator activated the object."))
+		"Adds an activator to the activator set. Returns true if this activator activated the object."))
 	bool AddActivator(AActor* activator = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Activatables", meta = (Description = 
-		"Removes an activator from the activator set. If the activator in question was not activating this actor to begin with, it is added to this actor's set of deactivators. Returns true if this activator deactivated the object."))
+		"Removes an activator from the activator set. Returns true if this activator deactivated the object."))
 	bool RemoveActivator(AActor* activator = nullptr);
 
 	UFUNCTION(BlueprintPure, Category = "Activatables", meta = (Description = 
 		"The number of activators currently applied to this actor. The result is num activators - num deactivators"))
 	int GetNumActivators();
+
+	UFUNCTION(BlueprintPure, Category = "Activatables", meta = (Description =
+		"Returns the list of all activators contributing toward this actor's activation state."))
+	TArray<AActor*> GetActivatorList();
+
+	UFUNCTION(BlueprintCallable, Category = "Activatables", meta = (Description =
+		"Set The number of required activators to activate this actor. This will automatically update its activation state."))
+	void SetRequiredActivators(int newCount);
+
+	UFUNCTION(BlueprintPure, Category = "Activatables", meta = (Description = "Checks if the specified actor is currently an activator for this activatable."))
+	bool IsActivator(AActor* activator);
+
+	UFUNCTION(BlueprintCallable, Category = "Activatables", meta = (Description = "Sets if this activatable should stay active after being activated, even if an activator is removed from it later on."))
+	void SetRemainActive(bool remainActive);
 
 	// Notification Events
 	UPROPERTY(BlueprintAssignable)
@@ -63,4 +77,8 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Activatables", meta = (Description =
 		"Whether this activatable actor should remain active after it's been activated once, disregarding deactivations."))
 	bool RemainActive = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Activatables", meta = (Description =
+		"If false, this actor will only activate if it meets the required activator count exactly. Going over will deactivate it."))
+	bool CanOverflow = true;
 };

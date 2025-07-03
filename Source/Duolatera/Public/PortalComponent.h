@@ -16,6 +16,20 @@ class USceneCaptureComponent2D;
 class IHeadMountedDisplay;
 class UBoxComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FPortalTraversedDelegate, AActor*, object, UPortalComponent*, fromPortal, UPortalComponent*, toPortal);
+
+UCLASS(ClassGroup = (DuolateraComponents), meta = (BlueprintSpawnableComponent))
+class DUOLATERA_API UPortalPlane : public UStaticMeshComponent
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, Category = "Portal Plane Properties")
+	UPortalPlane* destination = nullptr;
+
+};
+
 UCLASS(ClassGroup=(DuolateraComponents), meta=(BlueprintSpawnableComponent))
 class DUOLATERA_API UPortalComponent : public UActorComponent
 {
@@ -40,7 +54,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Portals")
 	// Returns this portal's destination portal.
-	UPortalComponent* GetDestinationPortal();
+	UPortalComponent* GetDestinationPortal() { return destinationPortal; };
+
+	UFUNCTION(BlueprintCallable, Category = "Portals")
+	void RenderThisPortal();
 
 	UFUNCTION(BlueprintCallable, Category = "Portals")
 	// Offsets the portal planes by a specific amount
@@ -48,19 +65,32 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Portals")
 	// Transforms a given transform from this portal to its exit
-	FTransform PortalTransform(FTransform initTM, UStaticMeshComponent* portalPlane);
+	static FTransform PortalTransform(FTransform initTM, UPortalPlane* portalPlane);
 
 	UFUNCTION(BlueprintPure, Category = "Portals")
 	// Transforms a given vector from this portal to its exit
-	FVector PortalTransformPoint(FVector initPt, UStaticMeshComponent* portalPlane);
+	static FVector PortalTransformPoint(FVector initPt, UPortalPlane* portalPlane);
 
 	UFUNCTION(BlueprintPure, Category = "Portals")
 	// Transforms a given vector from this portal to its exit
-	FVector PortalTransformVector(FVector initVec, UStaticMeshComponent* portalPlane);
+	static FVector PortalTransformVector(FVector initVec, UPortalPlane* portalPlane);
 
 	UFUNCTION(BlueprintPure, Category = "Portals")
 	// Transforms a given quaternion from this portal to its exit
-	FQuat PortalTransformRotation(FQuat initRot, UStaticMeshComponent* portalPlane);
+	static FRotator PortalTransformRotation(FRotator initRot, UPortalPlane* portalPlane);
+
+
+	UFUNCTION(BlueprintCallable, Category = "Portals")
+	void ResetWarp();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Portal Properties")
+	float warpAmount = -4.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Portal Properties")
+	bool traversable = true;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FPortalTraversedDelegate OnPortalTraversed;
 
 private:
 
@@ -70,9 +100,11 @@ private:
 	void OnEndOverlap(UPrimitiveComponent* overlappedComponent, AActor* otherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	// Updates the Scene Capture transforms, applying VR eye offsets
-	void UpdateEye(float dt, int stereoIndex, FVector initCameraLoc, FQuat initCameraRot, UStaticMeshComponent* enterPlane, UStaticMeshComponent* exitPlane);
+	void UpdateEye(float dt, int stereoIndex, FVector initCameraLoc, FQuat initCameraRot, UPortalPlane* enterPlane);
 
-	bool IsInFrustum(AActor* Actor, int stereoIndex);
+	bool IsInFrustum(UStaticMeshComponent* plane);
+
+	UPortalPlane* GetEnterPlane(FVector location);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Portal Properties")
 	UMaterialInterface* portalMatParent;
@@ -80,16 +112,14 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "Portal Properties")
 	UPortalComponent* destinationPortal;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Portal Properties")
-	float warpAmount = -4.f;
-
 	float planeOffset = 20.f;
 
 	// Portal material ptr and render targets for each eye
-	UMaterialInstanceDynamic* portalMat;
+	UMaterialInstanceDynamic* portalOffsetMat;
+	UMaterialInstanceDynamic* portalPPMat;
 	UTextureRenderTarget2D* portalRTs[2];
 	AActor* player;
-	UStaticMeshComponent* frontPlane, * backPlane;
+	UPortalPlane* frontPlane, * backPlane;
 	
 	// Cameras
 	UCameraComponent *playerCam;
@@ -98,5 +128,7 @@ private:
 
 	// for detection and teleportation of objects through the portal
 	UBoxComponent* detector;
-	TMap<USceneComponent*, bool> overlapMap;
+	TMap<USceneComponent*, UPortalPlane*> overlapMap;
+	
+	bool renderEyes = false;
 };
